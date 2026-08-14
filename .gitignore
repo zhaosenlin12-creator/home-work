@@ -46,3 +46,15 @@ Thumbs.db
 *.todelete
 /tmp/
 /coverage/
+
+# ---- Android / Capacitor 构建产物 ----
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/capacitor-cordova-android-plugins/build/
+android/capacitor-cordova-android-plugins/src/main/assets/
+android/app/src/main/assets/
+android/app/src/main/res/values/strings.xml.bak
+*.keystore
+*.jks

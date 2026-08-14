@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import Avatar from "@/components/Avatar";
+import LanQRCode from "@/components/LanQRCode";
 import { LogoTree } from "@/components/icons";
 import { UserRound, Baby, Lock } from "lucide-react";
 
@@ -66,7 +67,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-sm glass-strong rounded-3xl p-6 animate-modal-pop">
         <div className="text-center mb-6">
           <div className="inline-block animate-float">
@@ -183,6 +184,24 @@ export default function LoginPage() {
             </button>
           </div>
         )}
+      </div>
+
+      {/* 手机扫码快捷入口（局域网内免输链接） */}
+      <div className="w-full max-w-sm mt-4">
+        <div className="glass rounded-3xl p-4 animate-modal-pop">
+          <div className="flex items-center justify-between gap-4">
+            <LanQRCode size={110} />
+            <div className="flex-1 text-sm text-ink/80 leading-relaxed">
+              <div className="font-bold text-ink mb-1">手机扫码使用</div>
+              手机连接同一 Wi-Fi 后扫码，
+              浏览器打开即可登录。
+              <br />
+              <span className="text-xs text-ink-soft">
+                建议「添加到主屏幕」，像 App 一样使用
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

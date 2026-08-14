@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { usePolling } from "@/lib/usePolling";
+import LanQRCode from "@/components/LanQRCode";
 import Link from "next/link";
 import Avatar from "@/components/Avatar";
 import {
@@ -15,6 +16,7 @@ import {
   Medal,
   ListChecks,
   Star,
+  Smartphone,
 } from "lucide-react";
 
 type Overview = {
@@ -86,6 +88,18 @@ export default function ParentDashboard() {
 
   return (
     <div className="space-y-6">
+      {/* 手机扫码快捷入口 */}
+      <div className="glass-strong rounded-3xl p-4 flex items-center gap-4">
+        <LanQRCode size={88} showText={false} />
+        <div className="flex-1 text-sm text-ink/80 leading-relaxed">
+          <div className="font-bold text-ink mb-1 flex items-center gap-1.5">
+            <Smartphone size={15} className="text-mint-dark" /> 手机端访问
+          </div>
+          孩子手机连同一 Wi-Fi 后扫码进入学习空间；
+          浏览器打开后点「添加到主屏幕」，即可像 App 一样使用。
+        </div>
+      </div>
+
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {stats.map((s, i) => {
           const Icon = s.icon;
