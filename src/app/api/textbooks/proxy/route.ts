@@ -8,11 +8,11 @@ import { pipeline } from "node:stream/promises";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// 多源回退：GitHub Raw（国内慢/可能被墙）→ GitHub Proxy → 镜像
+// 多源回退：jsDelivr CDN（国内快，首选）→ GitHub Raw（兜底，直连国内偏慢）
+// 注意：ghproxy.com / mirror.ghproxy.com 等镜像已停止服务，不再使用
 const REPO_SOURCES = [
+  "https://cdn.jsdelivr.net/gh/TapXWorld/ChinaTextbook@master/",
   "https://raw.githubusercontent.com/TapXWorld/ChinaTextbook/master/",
-  "https://ghproxy.com/https://raw.githubusercontent.com/TapXWorld/ChinaTextbook/master/",
-  "https://mirror.ghproxy.com/https://raw.githubusercontent.com/TapXWorld/ChinaTextbook/master/",
 ];
 
 // 超过此大小的 PDF 不落盘，仅尝试流式转发（但优先缓存常规教材）
@@ -31,7 +31,7 @@ h2{margin:0 0 8px;font-size:18px}.tip{color:#889;font-size:13px;line-height:1.6;
 a.btn{display:inline-block;background:#2f7d6b;color:#fff;text-decoration:none;padding:10px 18px;border-radius:12px;font-size:14px}
 a.sec{display:inline-block;margin-top:10px;color:#2f7d6b;font-size:13px;text-decoration:underline}</style></head>
 <body><div class="box"><h2>教材加载失败 😢</h2>
-<p class="tip">${message}。请确认网络可以访问 GitHub，或稍后重试。</p>
+<p class="tip">${message}。请确认网络可访问外网，或稍后重试；也可点击下方链接在浏览器直接打开。</p>
 <a class="btn" href="" onclick="location.reload()">重新加载</a><br>
 <a class="sec" href="${raw}" target="_blank" rel="noreferrer">点此浏览器直连打开</a></div></body></html>`;
 }
@@ -45,11 +45,15 @@ async function fetchWithSources(
     .map((seg) => encodeURIComponent(seg))
     .join("/");
 
+  // jsDelivr CDN 快但单文件限 50MB；GitHub Raw 慢但对大文件唯一可行。
+  // 按源区分超时：CDN 30s，直连 150s（大文件耐心等待）
   for (const base of sources) {
     const url = base + encoded;
     try {
       const ctrl = new AbortController();
-      const timeout = setTimeout(() => ctrl.abort(), 45000);
+      const isJsDelivr = base.includes("jsdelivr.net");
+      const timeoutMs = isJsDelivr ? 30_000 : 150_000;
+      const timeout = setTimeout(() => ctrl.abort(), timeoutMs);
       const r = await fetch(url, {
         headers: { "User-Agent": "Mozilla/5.0" },
         signal: ctrl.signal,

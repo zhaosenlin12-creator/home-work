@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { usePoints } from "@/lib/points-context";
+import { usePolling } from "@/lib/usePolling";
 import {
   CheckCircle2,
   Star,
@@ -47,12 +48,25 @@ export default function KidHome() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  async function load() {
+    try {
+      const d = await api<Summary>("/api/kid/summary");
+      setData(d);
+      setError("");
+    } catch {
+      // 轮询期间失败保持旧数据，不打断界面
+      if (!data) setError("加载失败，请刷新重试");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   useEffect(() => {
-    api<Summary>("/api/kid/summary")
-      .then(setData)
-      .catch(() => setError("加载失败，请刷新重试"))
-      .finally(() => setLoading(false));
+    load();
   }, []);
+
+  // 跨端自动刷新：家长布置新任务/发勋章后孩子端自动更新
+  usePolling(load);
 
   if (loading) {
     return <div className="text-center py-20 text-ink-soft">加载中…</div>;
@@ -244,6 +258,9 @@ function TodayPlanCard() {
   useEffect(() => {
     load();
   }, []);
+
+  // 跨端自动刷新：家长调整学习计划后孩子端自动更新
+  usePolling(load, 60_000);
 
   if (!data || data.total === 0) return null;
 

@@ -27,6 +27,17 @@ import {
   Sun,
   Music,
   Palette,
+  Trophy,
+  Cake,
+  IceCreamBowl,
+  Gamepad2,
+  Dribbble,
+  Pizza,
+  Shirt,
+  Plane,
+  Smartphone,
+  Tv,
+  Umbrella,
 } from "lucide-react";
 
 type Badge = {
@@ -88,7 +99,22 @@ const BADGE_ICON_CHOICES = [
   "Wallet",
 ];
 
-const REWARD_ICONS = ["🎁", "🎡", "📺", "⭐", "🧁", "🍦", "🎮", "📚", "🏀", "🎨"];
+// 奖励图标（lucide 图标名，符合"禁 emoji、全矢量"规范）
+const REWARD_ICON_CHOICES = ["Gift", "Trophy", "Star", "Sparkles", "Cake", "IceCreamBowl", "Gamepad2", "BookOpen", "Dribbble", "Palette", "Pizza", "Shirt", "Plane", "Smartphone", "Tv", "Umbrella"];
+
+// 旧 emoji 奖励兼容映射（历史数据）
+const REWARD_EMOJI_MAP: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
+  "🎁": Gift,
+  "🎡": Target,
+  "📺": Tv,
+  "⭐": Star,
+  "🧁": Cake,
+  "🍦": IceCreamBowl,
+  "🎮": Gamepad2,
+  "📚": BookOpen,
+  "🏀": Dribbble,
+  "🎨": Palette,
+};
 
 export default function ParentBadges() {
   const [badges, setBadges] = useState<Badge[]>([]);
@@ -102,7 +128,7 @@ export default function ParentBadges() {
   const [newDesc, setNewDesc] = useState("");
   const [newIcon, setNewIcon] = useState("Award");
   const [newCost, setNewCost] = useState("50");
-  const [newRewardIcon, setNewRewardIcon] = useState("🎁");
+  const [newRewardIcon, setNewRewardIcon] = useState("Gift");
   const [toast, setToast] = useState("");
   // 分发弹窗状态
   const [grantBadge, setGrantBadge] = useState<Badge | null>(null);
@@ -222,7 +248,7 @@ export default function ParentBadges() {
       });
       setNewTitle("");
       setNewCost("50");
-      setNewRewardIcon("🎁");
+      setNewRewardIcon("Gift");
       setShowAdd(false);
       showToast("奖励已添加");
       loadRewards();
@@ -244,6 +270,11 @@ export default function ParentBadges() {
 
   function badgeIcon(b: Badge) {
     return BADGE_ICON_MAP[b.icon] ?? EMOJI_ICON_MAP[b.icon] ?? Award;
+  }
+
+  function rewardIcon(r: Reward) {
+    const name = r.icon as keyof typeof BADGE_ICON_MAP;
+    return BADGE_ICON_MAP[name] ?? REWARD_EMOJI_MAP[r.icon] ?? Gift;
   }
 
   return (
@@ -433,7 +464,7 @@ export default function ParentBadges() {
                   onChange={(e) => setNewRewardIcon(e.target.value)}
                   className="flex-1 px-3 py-2.5 rounded-2xl bg-white/70 border border-white/80 outline-none text-sm"
                 >
-                  {REWARD_ICONS.map((ico) => (
+                  {REWARD_ICON_CHOICES.map((ico) => (
                     <option key={ico} value={ico}>
                       {ico}
                     </option>
@@ -451,21 +482,26 @@ export default function ParentBadges() {
           )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {rewards.map((r) => (
-              <div key={r.id} className="glass-strong rounded-3xl p-4 flex items-center gap-3">
-                <div className="text-4xl">{r.icon}</div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-bold text-ink truncate">{r.title}</div>
-                  <div className="text-sm text-warning font-extrabold">{r.cost} 积分</div>
+            {rewards.map((r) => {
+              const RIcon = rewardIcon(r);
+              return (
+                <div key={r.id} className="glass-strong rounded-3xl p-4 flex items-center gap-3">
+                  <span className="w-11 h-11 rounded-2xl bg-warning/10 text-warning flex items-center justify-center shrink-0">
+                    <RIcon size={22} />
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-bold text-ink truncate">{r.title}</div>
+                    <div className="text-sm text-warning font-extrabold">{r.cost} 积分</div>
+                  </div>
+                  <button
+                    onClick={() => deleteReward(r.id)}
+                    className="p-2 rounded-xl bg-coral/10 text-coral hover:bg-coral/20 transition-colors"
+                  >
+                    <Trash2 size={16} />
+                  </button>
                 </div>
-                <button
-                  onClick={() => deleteReward(r.id)}
-                  className="p-2 rounded-xl bg-coral/10 text-coral hover:bg-coral/20 transition-colors"
-                >
-                  <Trash2 size={16} />
-                </button>
-              </div>
-            ))}
+              );
+            })}
             {rewards.length === 0 && (
               <div className="col-span-full glass rounded-3xl p-6 text-center text-ink-soft text-sm">
                 还没有设置奖励，点击「添加奖励」让孩子可以用积分兑换。

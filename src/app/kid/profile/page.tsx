@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { usePolling } from "@/lib/usePolling";
 import {
   LogOut,
   BookOpen,
@@ -33,14 +34,22 @@ export default function KidProfile() {
   const [badges, setBadges] = useState<Badge[]>([]);
 
   useEffect(() => {
-    api<Me>("/api/auth/me")
-      .then((d) => {
-        setMe(d as never);
-        return api<{ badges: Badge[] }>(`/api/badges?childId=${d.id}`);
-      })
-      .then((d) => setBadges(d.badges))
-      .catch(() => {});
+    loadProfile();
   }, []);
+
+  // 跨端自动刷新：家长分发/撤销勋章后勋章墙自动更新
+  usePolling(loadProfile, 30_000);
+
+  async function loadProfile() {
+    try {
+      const d = await api<Me>("/api/auth/me");
+      setMe(d as never);
+      const b = await api<{ badges: Badge[] }>(`/api/badges?childId=${d.id}`);
+      setBadges(b.badges);
+    } catch {
+      /* keep old data during polling */
+    }
+  }
 
   async function logout() {
     await api("/api/auth/logout", { method: "POST" });

@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { usePoints } from "@/lib/points-context";
+import { usePolling } from "@/lib/usePolling";
+import BadgeIcon from "@/components/BadgeIcon";
 import { Gift, Star, Lock, CheckCircle2 } from "lucide-react";
 
 type Reward = { id: number; title: string; cost: number; icon: string };
@@ -35,6 +37,9 @@ export default function KidRewards() {
   useEffect(() => {
     load();
   }, []);
+
+  // 跨端自动刷新：家长添加/修改奖励后兑换屋自动更新
+  usePolling(load);
 
   async function redeem(reward: Reward) {
     if (reward.cost > (points ?? 0)) return;
@@ -86,7 +91,9 @@ export default function KidRewards() {
               }`}
             >
               <div className="flex items-center gap-3">
-                <div className="text-4xl">{r.icon}</div>
+                <span className="w-12 h-12 rounded-2xl bg-warning/10 text-warning flex items-center justify-center shrink-0">
+                  <BadgeIcon icon={r.icon} size={24} />
+                </span>
                 <div className="flex-1 min-w-0">
                   <div className="font-bold text-ink truncate">{r.title}</div>
                   <div className="text-sm text-warning font-extrabold flex items-center gap-1">

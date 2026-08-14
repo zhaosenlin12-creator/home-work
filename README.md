@@ -216,7 +216,19 @@ data/
 
 ## 🛠 部署指南
 
-### 单进程（推荐）
+### 家用（局域网，推荐）—— 双击即用
+
+Windows 用户直接双击 **`start.bat`**，脚本会自动完成：装依赖（首次）→ 构建（首次）→ 预下载三年级教材（首次）→ 启动服务，并打印手机访问地址。
+
+```text
+* 本机访问:   http://localhost:3101
+* 手机访问:   http://192.168.x.x:3101   （手机连同一 Wi-Fi）
+```
+
+> 首次会提示 Windows 防火墙放行 Node.js，选择「允许」即可让手机访问。
+> 关闭命令行窗口即停止服务。
+
+### 手动部署（单进程）
 ```bash
 npm install --production
 npm run build
@@ -237,6 +249,16 @@ CMD ["npm", "start"]
 ```
 
 数据持久化：挂载 `data/` 到宿主机（包含 senlin.db 和 textbook_cache）。
+
+### 教材加载说明
+- 教材 PDF 不随仓库分发（版权原因），由 `/api/textbooks/proxy` 按需下载缓存
+- 下载源：**jsDelivr CDN（国内快，≤50MB）→ GitHub Raw（兜底）**，自动多源回退
+- 首次部署建议预下载常用教材（三年级语数英）：
+  ```bash
+  node scripts/predownload-textbooks.mjs        # 核心 6 本
+  node scripts/predownload-textbooks.mjs --all  # 全部教材（量大，慎重）
+  ```
+- 首次在线加载单本教材约 3-10 秒，之后命中本地缓存即时打开
 
 ### 首次访问
 - 打开 `http://your-host:3101/login`

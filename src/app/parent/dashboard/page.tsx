@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import { usePolling } from "@/lib/usePolling";
 import Link from "next/link";
 import Avatar from "@/components/Avatar";
 import {
@@ -47,10 +48,21 @@ export default function ParentDashboard() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    api<Overview>("/api/parent/overview")
-      .then(setData)
-      .catch(() => setError("仪表盘加载失败，请刷新重试"));
+    load();
   }, []);
+
+  // 跨端自动刷新：孩子完成任务/兑换奖励后家长看板自动更新
+  usePolling(load, 30_000);
+
+  async function load() {
+    try {
+      const d = await api<Overview>("/api/parent/overview");
+      setData(d);
+      setError("");
+    } catch {
+      if (!data) setError("仪表盘加载失败，请刷新重试");
+    }
+  }
 
   if (error && !data) {
     return (

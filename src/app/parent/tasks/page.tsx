@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
+import { usePolling } from "@/lib/usePolling";
 import { Plus, BookOpen, Sparkles, CheckCircle2, XCircle, ClipboardList, FileQuestion, RefreshCw } from "lucide-react";
 import Avatar from "@/components/Avatar";
 
@@ -104,6 +105,9 @@ function ParentTasksInner() {
       .catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // 跨端自动刷新：孩子提交/完成任务后家长端自动看到待审核状态
+  usePolling(() => loadTasks(filterChild), 30_000);
 
   async function selectChild(id: number) {
     setFilterChild(id);

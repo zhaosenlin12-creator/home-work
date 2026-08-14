@@ -9,6 +9,8 @@ node_modules/
 
 # ---- Next.js 构建产物 ----
 .next/
+.next_*/
+.next-*/
 out/
 build/
 dist/
